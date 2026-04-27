@@ -12,7 +12,7 @@ export const Booking = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user, isAuthenticated } = useAuth();
-    const { photographers } = usePhotographers();
+    const { photographers, addBooking } = usePhotographers();
 
     // 1. Fetch Real Context Data
     const photographer = photographers.find(p => p.id === id);
@@ -41,23 +41,27 @@ export const Booking = () => {
     const handleConfirm = () => {
         setIsProcessing(true);
         setTimeout(() => {
-            // 3. Save to "chitrasetu_bookings"
+            // 3. Save directly to DB via Context
             const newBooking = {
                 id: `bk-${Date.now()}`,
                 userId: user?.id || "unknown",
                 clientName: user?.name || "Valued Client",
+                clientEmail: user?.email || '',
+                clientPhone: phone,
                 photographerId: photographer.id,
                 photographerName: photographer.name,
                 photographerImage: photographer.image,
                 photographerCity: photographer.city,
                 date: date,
+                time: '',
+                eventType: 'Standard',
+                locationDetails: 'Venue Location',
                 totalAmount: total,
-                status: "Confirmed",
-                createdAt: new Date().toISOString()
+                status: "upcoming"
             };
 
-            const existing = JSON.parse(localStorage.getItem("chitrasetu_bookings") || "[]");
-            localStorage.setItem("chitrasetu_bookings", JSON.stringify([...existing, newBooking]));
+            // @ts-ignore
+            addBooking(newBooking);
 
             setIsProcessing(false);
             navigate("/success");

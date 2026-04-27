@@ -1,6 +1,7 @@
 import fetch from 'node-fetch';
+import 'dotenv/config';
 
-const API_KEY = "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";
+const API_KEY = process.env.VITE_GROQ_API_KEY;
 
 async function testGroq() {
     console.log("Testing Groq API Key...");

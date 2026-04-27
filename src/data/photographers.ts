@@ -12,6 +12,7 @@ export interface Photographer {
     specialty: string; // e.g. "Wedding", "Wildlife"
     whyChosen: string;
     mapQuery: string;
+    instaUrl?: string;
 }
 
 export const photographers: Photographer[] = [
@@ -128,5 +129,65 @@ export const photographers: Photographer[] = [
         ],
         whyChosen: "He turns simple moments into dramatic, cinematic stills.",
         mapQuery: "Khammam Fort, Khammam"
+    },
+    {
+        id: "kalki",
+        name: "Kalki",
+        role: "Event & Portrait",
+        city: "Manchirial",
+        price: "₹15,000/day",
+        description: "Specializing in capturing vibrant moments and the raw emotions of events. Kalki brings stories to life, blending photojournalism with timeless elegance to create stunning narratives for every occasion.",
+        image: "/images/kalki.jpg",
+        rating: 4.8,
+        reviews: 135,
+        specialty: "Event",
+        portfolio: [
+            "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=2000&auto=format&fit=crop"
+        ],
+        whyChosen: "With a brilliant eye for capturing genuine joy, celebration, and candid expressions, Kalki's work stands out as uniquely authentic and full of character.",
+        mapQuery: "Mancherial, Telangana",
+        instaUrl: "https://www.instagram.com/kalki_8976/"
+    },
+    {
+        id: "prem",
+        name: "Prem Nandru",
+        role: "Urban & Fashion",
+        city: "Hyderabad",
+        price: "₹18,000/day",
+        description: "Defining modern urban style, Prem creates striking and cinematic images that stand out in any editorial or fashion setting. His mastery of lighting and dynamic perspective translates into visually arresting imagery.",
+        image: "/images/prem.png",
+        rating: 4.9,
+        reviews: 210,
+        specialty: "Fashion",
+        portfolio: [
+            "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=2000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?q=80&w=2000&auto=format&fit=crop"
+        ],
+        whyChosen: "Prem brings a deeply fresh, dynamic perspective to modern portraiture, making him a favorite for edgy and contemporary client shoots.",
+        mapQuery: "Hyderabad, Telangana",
+        instaUrl: "https://www.instagram.com/prem_nandru/"
+    },
+    {
+        id: "pavan-adilabad",
+        name: "Pavan",
+        role: "Nature & Landscape",
+        city: "Adilabad",
+        price: "₹16,000/day",
+        description: "Immersed in nature, Pavan captures the breathtaking landscapes and subtle beauty of the outdoors.",
+        image: "/images/pavan-adilabad.jpg",
+        rating: 4.7,
+        reviews: 74,
+        specialty: "Landscape",
+        portfolio: [
+            "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=2000&auto=format&fit=crop",
+            "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2000&auto=format&fit=crop"
+        ],
+        whyChosen: "His deep connection to Adilabad's scenery translates into stunning, immersive visuals.",
+        mapQuery: "Adilabad, Telangana",
+        instaUrl: "https://www.instagram.com/dop.pavan/"
     }
 ];

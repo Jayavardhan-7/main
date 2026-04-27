@@ -3,7 +3,7 @@ import { MessageCircle, X, Send, Bot } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { photographers } from "../../data/photographers";
 
-const GROQ_API_KEY = "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"; // Ideally in .env, but hardcoded for demo speed
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 // Construct System Prompt with Data
 const SYSTEM_PROMPT = `
@@ -50,7 +50,7 @@ export const Chatbot = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch("/api/groq/openai/v1/chat/completions", {
+            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${GROQ_API_KEY}`,

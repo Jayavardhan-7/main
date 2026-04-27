@@ -1,15 +1,16 @@
 import { useParams, Link } from "react-router-dom";
-import { photographers } from "../data/photographers";
+import { usePhotographers } from "../context/PhotographerContext";
 import { Button } from "../components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Star, Share2, Shield, Camera, Image as ImageIcon, X, Quote } from "lucide-react";
+import { MapPin, Star, Share2, Shield, Camera, Image as ImageIcon, X, Quote, Instagram } from "lucide-react";
 import { Card } from "../components/ui/Card";
 import { useState } from "react";
 import { MapPlaceholder } from "../components/MapPlaceholder"; // Imported
 
 export const Profile = () => {
     const { id } = useParams();
-    const photographer = photographers.find(p => p.id === id);
+    const { allPhotographers } = usePhotographers();
+    const photographer = allPhotographers.find(p => p.id === id);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     if (!photographer) {
@@ -150,6 +151,13 @@ export const Profile = () => {
                                         <Button variant="outline" className="w-full border-white/10 hover:bg-white/5 hover:text-white text-gray-400">
                                             <Share2 className="w-4 h-4 mr-2" /> Share Profile
                                         </Button>
+                                        {photographer.instaUrl && (
+                                            <a href={photographer.instaUrl} target="_blank" rel="noopener noreferrer" className="block">
+                                                <Button variant="outline" className="w-full border-pink-500/30 hover:bg-pink-500/10 hover:border-pink-500 text-pink-400 transition-all">
+                                                    <Instagram className="w-4 h-4 mr-2" /> Follow on Instagram
+                                                </Button>
+                                            </a>
+                                        )}
                                     </div>
 
                                     <div className="text-center space-y-2">

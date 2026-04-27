@@ -15,12 +15,13 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from backend.views import frontend_serving_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     # API Routes should be placed here
+    path('api/', include('api.urls')),
     
     # Catch-all route to serve the React application
     # Explicitly ignores /api/ and /admin/ routines via regex

@@ -27,6 +27,17 @@ export const JoinNetwork = () => {
         whyChosen: ""
     });
 
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData({ ...formData, image: reader.result as string });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -169,11 +180,16 @@ export const JoinNetwork = () => {
                                 <Upload className="w-4 h-4" /> Portfolio Showcase
                             </h3>
                             <div className="space-y-2">
-                                <label className="text-sm text-gray-400">Profile Image URL</label>
-                                <input required type="url"
-                                    value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })}
-                                    className="w-full bg-black/20 border border-white/10 rounded-lg p-3 focus:border-gold-leaf/50 outline-none transition-colors"
-                                    placeholder="https://..." />
+                                <label className="text-sm text-gray-400">Upload Profile Picture</label>
+                                <input required type="file" accept="image/*"
+                                    onChange={handleImageUpload}
+                                    className="w-full bg-black/20 border border-white/10 rounded-lg p-3 outline-none text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-gold-leaf file:text-black hover:file:bg-white transition-all"
+                                />
+                                {formData.image && formData.image.startsWith("data:") && (
+                                    <div className="mt-2 flex justify-center">
+                                        <img src={formData.image} alt="Preview" className="w-16 h-16 rounded-full object-cover border border-gold-leaf" />
+                                    </div>
+                                )}
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm text-gray-400">Bio / Description</label>

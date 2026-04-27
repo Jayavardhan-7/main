@@ -3,34 +3,15 @@ import { Link } from "react-router-dom";
 import { Calendar, CheckCircle, MapPin, Search } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { Card } from "../components/ui/Card";
-import { useEffect, useState } from "react";
 import { BookingTimeline } from "../components/BookingTimeline";
 import { useAuth } from "../context/AuthContext";
-
-interface BookingData {
-    id: string;
-    userId: string;
-    photographerId: string;
-    photographerName: string;
-    photographerImage: string;
-    photographerCity: string;
-    date: string;
-    totalAmount: number;
-    status: string;
-}
+import { usePhotographers } from "../context/PhotographerContext";
 
 export const MyBookings = () => {
     const { user } = useAuth();
-    const [bookings, setBookings] = useState<BookingData[]>([]);
-
-    useEffect(() => {
-        if (user) {
-            const allBookings = JSON.parse(localStorage.getItem("chitrasetu_bookings") || "[]");
-            // Filter: Bookings made BY this user
-            const userBookings = allBookings.filter((b: BookingData) => b.userId === user.id);
-            setBookings(userBookings);
-        }
-    }, [user]);
+    const { bookings: allBookings } = usePhotographers();
+    
+    const bookings = user ? allBookings.filter((b: any) => b.userId === user.id) : [];
 
     if (!user) {
         return <div className="min-h-screen bg-rich-black flex items-center justify-center text-white">Please log in to view bookings.</div>;

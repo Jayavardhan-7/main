@@ -15,9 +15,10 @@ export interface Photographer {
     specialty: string;
     whyChosen: string;
     mapQuery: string;
-    status: 'approved' | 'pending' | 'rejected'; // Added status
+    status: 'approved' | 'pending' | 'rejected';
     email?: string;
     password?: string;
+    instaUrl?: string;
 }
 
 export interface Booking {
@@ -43,6 +44,7 @@ interface PhotographerContextType {
     rejectPhotographer: (id: string) => void;
     updatePhotographer: (p: Photographer) => void;
     deletePhotographer: (id: string) => void;
+    addBooking: (b: Booking) => void; // New helper method
     stats: {
         totalPhotographers: number;
         totalBookings: number;
@@ -57,33 +59,37 @@ export const PhotographerProvider = ({ children }: { children: React.ReactNode }
     const [photographersList, setPhotographersList] = useState<Photographer[]>([]);
     const [bookings, setBookings] = useState<Booking[]>([]);
 
-    // 1. Initialize / Seed Data
     useEffect(() => {
-        const stored = localStorage.getItem("chitrasetu_photographers");
-        if (stored) {
-            setPhotographersList(JSON.parse(stored));
-        } else {
-            // Seed initial data and mark them as APPROVED
-            const seeded = initialData.map(p => ({ ...p, status: 'approved' as const }));
-            localStorage.setItem("chitrasetu_photographers", JSON.stringify(seeded));
-            setPhotographersList(seeded);
-        }
+        // Initialize Database Data
+        fetch('/api/photographers/')
+            .then(res => res.json())
+            .then(data => {
+                if (data.length === 0) {
+                    const seeded = initialData.map(p => ({ ...p, status: 'approved' as 'approved' }));
+                    fetch('/api/photographers/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(seeded)
+                    }).then(r => r.json()).then(setPhotographersList);
+                } else {
+                    setPhotographersList(data);
+                }
+            })
+            .catch(console.error);
 
-        const storedBookings = JSON.parse(localStorage.getItem("chitrasetu_bookings") || "[]");
-        setBookings(storedBookings);
+        fetch('/api/bookings/')
+            .then(res => res.json())
+            .then(setBookings)
+            .catch(console.error);
     }, []);
 
-    // 2. Persist changes
-    const saveToStorage = (newData: Photographer[]) => {
-        localStorage.setItem("chitrasetu_photographers", JSON.stringify(newData));
-        setPhotographersList(newData);
-    };
-
-    // Actions
     const addPhotographer = (p: Photographer) => {
-        // Admin force add (auto approved)
         const newRecord = { ...p, status: p.status || 'approved' };
-        saveToStorage([...photographersList, newRecord]);
+        fetch('/api/photographers/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newRecord)
+        }).then(r => r.json()).then(saved => setPhotographersList(prev => [...prev, saved]));
     };
 
     const registerPhotographer = (data: Omit<Photographer, "id" | "status" | "rating" | "reviews">) => {
@@ -91,88 +97,54 @@ export const PhotographerProvider = ({ children }: { children: React.ReactNode }
             ...data,
             id: Date.now().toString(),
             status: 'pending',
-            rating: 0, // New users start with 0
+            rating: 0,
             reviews: 0
         };
-        saveToStorage([...photographersList, newRecord]);
+        fetch('/api/photographers/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newRecord)
+        }).then(r => r.json()).then(saved => setPhotographersList(prev => [...prev, saved]));
     };
 
     const approvePhotographer = (id: string) => {
-        const photographer = photographersList.find(p => p.id === id);
-
-        if (photographer && photographer.email && photographer.password) {
-            // REGISTER USER IN AUTH DB
-            const usersDb = JSON.parse(localStorage.getItem("chitrasetu_users_db") || "[]");
-            // Check if user already exists
-            if (!usersDb.find((u: any) => u.email === photographer.email)) {
-                usersDb.push({
-                    id: photographer.email,
-                    name: photographer.name,
-                    email: photographer.email,
-                    role: 'photographer',
-                    password: photographer.password
-                });
-                localStorage.setItem("chitrasetu_users_db", JSON.stringify(usersDb));
-                console.log("User account created for:", photographer.email);
-            }
-        }
-
-        const newData = photographersList.map(p => p.id === id ? { ...p, status: 'approved' as const } : p);
-        saveToStorage(newData);
-
-        // SYNC WITH "BACKEND TABLE" photographers_photographer
-        try {
-            const photographerToInsert = newData.find(p => p.id === id);
-            if (photographerToInsert) {
-                const dbKey = "photographers_photographer";
-                const currentDb = JSON.parse(localStorage.getItem(dbKey) || "[]");
-
-                // Avoid duplicates based on ID
-                if (!currentDb.find((p: any) => p.id === photographerToInsert.id)) {
-                    const updatedDb = [...currentDb, photographerToInsert];
-                    localStorage.setItem(dbKey, JSON.stringify(updatedDb));
-                    console.log(`Successfully inserted into ${dbKey}`, photographerToInsert);
-                }
-            }
-        } catch (err) {
-            console.error("Failed to update photographers_photographer DB:", err);
-        }
+        setPhotographersList(prev => prev.map(p => p.id === id ? { ...p, status: 'approved' as const } : p));
+        fetch(`/api/photographers/${id}/`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'approved' })
+        });
     };
 
     const rejectPhotographer = (id: string) => {
-        try {
-            console.log("Rejecting (Deleting) ID:", id);
-            const newData = photographersList.filter(p => p.id !== id);
-            saveToStorage(newData);
-        } catch (error) {
-            console.error("Failed to reject photographer:", error);
-        }
+        setPhotographersList(prev => prev.filter(p => p.id !== id));
+        fetch(`/api/photographers/${id}/`, { method: 'DELETE' });
     };
 
     const updatePhotographer = (updated: Photographer) => {
-        const newData = photographersList.map(p => p.id === updated.id ? updated : p);
-        saveToStorage(newData);
+        setPhotographersList(prev => prev.map(p => p.id === updated.id ? updated : p));
+        fetch(`/api/photographers/${updated.id}/`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updated)
+        });
     };
 
     const deletePhotographer = (id: string) => {
-        try {
-            console.log("Attempting to delete ID:", id);
-            if (!id) {
-                console.error("Error: ID is undefined or null");
-                alert("Error: Cannot delete, ID is missing.");
-                return;
-            }
-            const newData = photographersList.filter(p => p.id !== id);
-            saveToStorage(newData);
-            console.log("Deleted successfully. New list size:", newData.length);
-        } catch (error) {
-            console.error("Failed to delete photographer:", error);
-            alert("Failed to delete photographer. Check console for details.");
-        }
+        setPhotographersList(prev => prev.filter(p => p.id !== id));
+        fetch(`/api/photographers/${id}/`, { method: 'DELETE' });
     };
 
-    // Derived States
-    const approvedPhotographers = photographersList.filter(p => p.status === 'approved' || !p.status); // specific fallback for legacy data
+    // New Booking Method targeting DB
+    const addBooking = (b: Booking) => {
+        fetch('/api/bookings/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(b)
+        }).then(r => r.json()).then(saved => setBookings(prev => [...prev, saved]));
+    };
+
+    const approvedPhotographers = photographersList.filter(p => p.status === 'approved' || !p.status);
     const pendingPhotographers = photographersList.filter(p => p.status === 'pending');
 
     const stats = {
@@ -194,6 +166,7 @@ export const PhotographerProvider = ({ children }: { children: React.ReactNode }
             rejectPhotographer,
             updatePhotographer,
             deletePhotographer,
+            addBooking,
             stats
         }}>
             {children}

@@ -17,24 +17,30 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import { PhotographerProvider } from "./context/PhotographerContext";
 
-import { useState } from "react";
+
 import { CinematicIntro } from "./components/ui/CinematicIntro";
+import { useState } from "react";
 import { VisionaryCosmos } from "./components/ui/VisionaryCosmos";
 
 import { JoinNetwork } from "./pages/JoinNetwork";
 
 function App() {
-  const [showIntro, setShowIntro] = useState(true);
+    const [showIntro, setShowIntro] = useState(() => !sessionStorage.getItem("intro_played"));
 
-  return (
-    <AuthProvider>
-      <PhotographerProvider>
-        {/* Global Intro - Plays on refresh */}
-        {showIntro && <CinematicIntro onComplete={() => setShowIntro(false)} />}
+    const handleIntroComplete = () => {
+        sessionStorage.setItem("intro_played", "true");
+        setShowIntro(false);
+    };
 
-        {/* Main App - Blocked until Intro finishes */}
-        <div className={`transition-opacity duration-1000 ${showIntro ? 'opacity-0 pointer-events-none h-screen overflow-hidden' : 'opacity-100'}`}>
-          <Routes>
+    return (
+        <AuthProvider>
+            <PhotographerProvider>
+                {/* Global Intro - Plays once per session */}
+                {showIntro && <CinematicIntro onComplete={handleIntroComplete} />}
+
+                {/* Main App - Blocked until Intro finishes */}
+                <div className={`transition-opacity duration-1000 ${showIntro ? 'opacity-0 pointer-events-none h-screen overflow-hidden' : 'opacity-100'}`}>
+                    <Routes>
 
             {/* Public Routes */}
             <Route path="/" element={<Layout><Home /></Layout>} />

@@ -35,8 +35,8 @@ export const CinematicIntro = ({ onComplete }: CinematicIntroProps) => {
             animate={phase === 5 ? { opacity: 0 } : { opacity: 1 }}
             transition={{ duration: 0.8 }}
         >
-            {/* Ambient Gold Dust */}
-            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
+            {/* Ambient Base */}
+            <div className="absolute inset-0 bg-rich-black opacity-90" />
 
             {/* Text 1: Moments are born in silence */}
             <AnimatePresence>

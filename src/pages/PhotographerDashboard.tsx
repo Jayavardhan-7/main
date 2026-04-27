@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 
 export const PhotographerDashboard = () => {
     const { user } = useAuth();
-    const { photographers } = usePhotographers();
+    const { photographers, updatePhotographer, bookings } = usePhotographers();
     const [myBookings, setMyBookings] = useState<any[]>([]);
 
     // Find the photographer profile linked to this user (by email match or ID)
@@ -19,12 +19,10 @@ export const PhotographerDashboard = () => {
 
     useEffect(() => {
         if (myProfile) {
-            const allBookings = JSON.parse(localStorage.getItem("chitrasetu_bookings") || "[]");
-            // Filter bookings meant for THIS photographer
-            const relevant = allBookings.filter((b: any) => b.photographerId === myProfile.id || b.photographerName === myProfile.name);
+            const relevant = bookings.filter((b: any) => b.photographerId === myProfile.id || b.photographerName === myProfile.name);
             setMyBookings(relevant);
         }
-    }, [myProfile]);
+    }, [myProfile, bookings]);
 
     if (!user) return <div className="text-white pt-32 text-center">Please login.</div>;
 
@@ -131,6 +129,64 @@ export const PhotographerDashboard = () => {
                         </div>
                     )}
                 </div>
+
+                {/* Portfolio Management */}
+                <div className="space-y-6 pt-12">
+                    <h2 className="font-playfair text-3xl font-bold">Portfolio Management</h2>
+                    <Card className="p-6 bg-white/[0.02] border border-white/5 space-y-6">
+                        <div className="flex items-end gap-6">
+                            <div className="flex-1 space-y-2">
+                                <label className="text-sm text-gray-400">Upload New Portfolio Image</label>
+                                <input type="file" accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                const updatedProfile = { 
+                                                    ...myProfile, 
+                                                    portfolio: [...(myProfile.portfolio || []), reader.result as string] 
+                                                };
+                                                updatePhotographer(updatedProfile);
+                                                e.target.value = ''; // clear input
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                    className="w-full bg-black/20 border border-white/10 rounded-lg p-3 outline-none text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-white/10 file:text-white hover:file:bg-white/20 transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
+                            {(myProfile.portfolio || []).map((imgUrl, idx) => (
+                                <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-white/10">
+                                    <img src={imgUrl} alt="portfolio" className="w-full h-full object-cover" />
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                       <Button 
+                                           size="sm" 
+                                           variant="outline" 
+                                           className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                                           onClick={() => {
+                                                const updatedProfile = { 
+                                                    ...myProfile, 
+                                                    portfolio: myProfile.portfolio.filter(url => url !== imgUrl) 
+                                                };
+                                                updatePhotographer(updatedProfile);
+                                           }}
+                                       >
+                                           Remove
+                                       </Button>
+                                    </div>
+                                </div>
+                            ))}
+                            {(!myProfile.portfolio || myProfile.portfolio.length === 0) && (
+                                <p className="text-gray-500 italic col-span-full">No images in your portfolio yet.</p>
+                            )}
+                        </div>
+                    </Card>
+                </div>
+
             </div>
         </div>
     );
